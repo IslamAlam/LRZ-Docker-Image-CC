@@ -1,0 +1,86 @@
+version: "3.7"
+services:
+  jupyterhub:
+    container_name: jupyterhub_hub
+    # image: ${ML_VERSION}
+    build:
+      context: ./service.ml-hub
+      dockerfile: dev.dockerfile
+    restart: always
+    env_file:
+      - jupyterhub.env
+    ports:
+      - "${PORT}:8000"
+    expose: 
+      - "8000"
+    networks:
+      - jupyterhub
+    #volumes:
+    #  - ./service.ml-hub/resources:/resources
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock # Give access to Docker socket.
+      - type: bind
+        source: ./service.ml-hub/resources
+        target: /resources2
+      - ./service.ml-hub/resources/jupyterhub_config.py:/resources/jupyterhub_config.py
+      - ./service.ml-hub/resources/jupyterhub_user_config.py:/resources/jupyterhub_user_config.py
+      - ./service.ml-hub/resources/gitlab_oauth_credentials.json:/resources/gitlab_oauth_credentials.json
+      - ./service.ml-hub/resources/ssl:/resources/ssl
+    environment:                     # Env variables passed to the Hub process.
+      DOCKER_JUPYTER_IMAGE: jupyterlab_img
+      DOCKER_NETWORK_NAME: jupyterhub
+      HUB_IP: jupyterhub_hub
+
+    labels:
+      - "traefik.port=8000"
+      - "traefik.protocol=http"
+      - "traefik.frontend.rule=PathPrefix:/"
+
+  jupyterlab:
+    container_name: jupyterlab_img
+    build:
+      context: ./service.ml-workspace
+      dockerfile: dev.dockerfile
+
+    command: echo
+
+  reverse-proxy:
+    container_name: traefik
+    image: traefik:v1.7.16
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - ./reverse-proxy/traefik.toml:/etc/traefik/traefik.toml
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./service.ml-hub/resources/ssl:/etc/certs
+
+
+networks:
+  jupyterhub:
+    driver: overlay
+    attachable: true
+
+
+#    command: sh -c "
+#      useradd --create-home mansour &&
+#      echo -e "qazwsx123\nqazwsx123\n" | passwd mansour"
+#    environment:
+#      - HUB_IP=jupyterhub
+#      - HOST
+    #command: ["ls  /resources"]
+ 
+# volumes:
+#   - type: volume
+#     source: mydata
+#     target: /data
+#     volume:
+#       nocopy: true
+#   - type: bind
+#     source: ./static
+#     target: /opt/app/static
+# volumes:
+#   mydata:
+#   dbdata:

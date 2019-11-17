@@ -1,0 +1,5 @@
+/etc
+/service.ml-hub/resources/resources
+/service.ml-hub/resources/ssl/cert.*
+
+gitlab_oauth_credentials.json
