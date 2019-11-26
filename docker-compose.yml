@@ -27,22 +27,23 @@ services:
       - ./service.ml-hub/resources/gitlab_oauth_credentials.json:/resources/gitlab_oauth_credentials.json
       - ./service.ml-hub/resources/ssl:/resources/ssl
     environment:                     # Env variables passed to the Hub process.
-      DOCKER_JUPYTER_IMAGE: jupyterlab_img
+      #DOCKER_JUPYTER_IMAGE: jupyterlab_img
       DOCKER_NETWORK_NAME: jupyterhub
       HUB_IP: jupyterhub_hub
 
     labels:
+      - "traefik.frontend.entryPoints=http,https"
       - "traefik.port=8000"
-      - "traefik.protocol=http"
       - "traefik.frontend.rule=PathPrefix:/"
+      - "traefik.protocol=http"
 
-  jupyterlab:
-    container_name: jupyterlab_img
-    build:
-      context: ./service.ml-workspace
-      dockerfile: dev.dockerfile
-
-    command: echo
+#  jupyterlab:
+#    container_name: jupyterlab_img
+#    build:
+#      context: ./service.ml-workspace
+#      dockerfile: dev.dockerfile
+#
+#    command: echo
 
   reverse-proxy:
     container_name: traefik
@@ -56,13 +57,19 @@ services:
       - ./reverse-proxy/traefik.toml:/etc/traefik/traefik.toml
       - /var/run/docker.sock:/var/run/docker.sock
       - ./service.ml-hub/resources/ssl:/etc/certs
+    networks:
+      - jupyterhub
 
-
+      
 networks:
   jupyterhub:
-    driver: overlay
-    attachable: true
-
+    driver: bridge
+    name: jupyterhub
+# networks:
+#   jupyterhub:
+#     driver: overlay
+#     attachable: true
+# 
 
 #    command: sh -c "
 #      useradd --create-home mansour &&

@@ -5,11 +5,18 @@ c.DockerSpawner.image = "mltooling/ml-workspace:0.8.6"
 c.DockerSpawner.workspace_images = [c.Spawner.image, "mltooling/ml-workspace-gpu:0.8.6", "mltooling/ml-workspace-r:0.8.6"]
 c.DockerSpawner.notebook_dir = '/workspace'
 
-# c.DockerSpawner.image = os.environ['DOCKER_JUPYTER_IMAGE']
-c.DockerSpawner.network_name = os.environ['DOCKER_NETWORK_NAME']
+# Connect containers to this Docker network
+network_name = os.environ['DOCKER_NETWORK_NAME']
 c.DockerSpawner.use_internal_ip = True
-#c.JupyterHub.hub_ip = os.environ['HUB_IP']
+c.DockerSpawner.network_name = network_name
+# Pass the network name as argument to spawned containers
+c.DockerSpawner.extra_host_config = { 'network_mode': network_name }
 
+# # c.DockerSpawner.image = os.environ['DOCKER_JUPYTER_IMAGE']
+# c.DockerSpawner.network_name = os.environ['DOCKER_NETWORK_NAME']
+# c.DockerSpawner.use_internal_ip = True
+# c.JupyterHub.hub_ip = os.environ['HUB_IP']
+# 
 # used to read the json gitlab oauth config file
 import json
 
