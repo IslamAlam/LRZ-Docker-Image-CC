@@ -1,9 +1,3 @@
-/etc
-/service.ml-hub/resources/resources
-/service.ml-hub/resources/ssl/cert.*
-
-gitlab_oauth_credentials.json
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -108,3 +102,10 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+
+/etc
+/service.ml-hub/resources/resources
+/service.ml-hub/resources/ssl/cert.*
+
+gitlab_oauth_credentials.json
